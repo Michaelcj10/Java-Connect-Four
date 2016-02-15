@@ -116,21 +116,16 @@ class Controller implements ActionListener {
         //we know the row so get the lowest value in it, start at that and check for each x both ways.
         int lowRange= boardRepresentation[whichRowIsItemIn(boardPosition, "Row")][0];
 
-    for(int x=lowRange; x<lowRange+6; x++)
-    {
-        if (checkWinDirectionLeft(x, "Left")) throw new WinException();
-        if (checkWinDirectionLeft(x,"Right")) throw new WinException();
-    }
-
-        int decision = (row < 3  ) ? 0 : 4;
-
-        if(decision>=3)
+        for(int x=lowRange; x<lowRange+6; x++)
         {
-          if (checkWinDirectionLeft(boardPosition, "Left")) throw new WinException();
-        }
-        else
-        {
-            if (checkWinDirectionLeft(boardPosition,"Right")) throw new WinException();
+            if(whichRowIsItemIn(boardPosition, "Col")>3)
+            {
+                if (checkWinDirectionLeft(x, "Left")) throw new WinException();
+            }
+            else
+            {
+                if (checkWinDirectionLeft(x,"Right")) throw new WinException();
+            }
         }
     }
 
