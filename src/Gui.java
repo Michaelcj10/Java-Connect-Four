@@ -4,12 +4,14 @@ import java.awt.*;
 
 class Gui extends JFrame {
     JButton[] myBoard;
-    private JPanel gridPanel,bottomPanel;
+    private JPanel gridPanel,bottomPanel, rightPanel;
     private Controller control;
     private final int boardGridSize = 42;
     private final int rowCount = 6;
     public final int absoluteMin = 0;
-    JButton resetButton = new JButton("Reset Game");
+    final JButton resetButton = new JButton("Reset Game");
+    final JLabel playerOneWins = new JLabel("P1: 0");
+    final JLabel playerTwoWins = new JLabel("P2: 0");
 
     private Gui() {
         super("Connect Four");
@@ -20,6 +22,7 @@ class Gui extends JFrame {
         myBoard = new JButton[boardGridSize];
         gridPanel = new JPanel();
         bottomPanel = new JPanel();
+        rightPanel = new JPanel();
         control = new Controller(this);
         makeGrid();
         gridPanel.setLayout(new GridLayout(rowCount+1, rowCount));
@@ -29,7 +32,7 @@ class Gui extends JFrame {
         setVisible(true);
     }
 
-    public void makeGrid() {
+    private void makeGrid() {
         for (int i = absoluteMin; i < boardGridSize; i++) {
 
 
@@ -71,9 +74,16 @@ class Gui extends JFrame {
         for (int i = absoluteMin; i < boardGridSize; i++) {
 
             myBoard[i].setIcon(null);
+            myBoard[i].setFocusable(true);
             String buttonText = (i % 2 == 0) ? "Text" : "AltText";
             myBoard[i].setName(buttonText);
+        }
+    }
 
+    public void setToGameWonState()
+    {
+        for (int i = absoluteMin; i < boardGridSize; i++) {
+            myBoard[i].setFocusable(false);
         }
     }
 
@@ -87,6 +97,9 @@ class Gui extends JFrame {
         setContentPane(contentPane);
         contentPane.add(gridPanel, BorderLayout.CENTER);
         contentPane.add(bottomPanel, BorderLayout.SOUTH);
+        contentPane.add(rightPanel, BorderLayout.EAST);
+        rightPanel.add(playerOneWins, BorderLayout.NORTH);
+        rightPanel.add(playerTwoWins, BorderLayout.CENTER);
         bottomPanel.add(resetButton);
         resetButton.setActionCommand("RESET_GAME");
     }

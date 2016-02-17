@@ -11,6 +11,9 @@ class Controller implements ActionListener {
     public final Map<String, String> actionCommandList = new HashMap<>();
     private int turnCount = 1;
     private Image discImage = null;
+    private int playerOneWins =0;
+    private int playerTwoWins =0;
+
     private static final int[][] boardRepresentation = {
             {0, 1, 2, 3, 4, 5},
             {6, 7, 8, 9, 10, 11},
@@ -45,7 +48,6 @@ class Controller implements ActionListener {
             actionCommandList.put(Integer.toString(x), "" + x);
         }
         myGame.resetButton.addActionListener(this);
-
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -54,32 +56,53 @@ class Controller implements ActionListener {
 
             myGame.resetBoard();
             turnCount=1;
-            
+
             return;
         }
 
-       if (e.getSource() instanceof JButton) {
+        if (e.getSource() instanceof JButton) {
 
             turnCount++;
             try {
                 decideDiscPosition(Integer.parseInt(e.getActionCommand()));
             } catch (IOException e1) {
-                showExceptionPanel("Whoops", "Problems");
+                try {
+                    DealWithVictoryException("Whoops", "Problems");
+                } catch (IOException e2) {
+                    e2.printStackTrace();
+                }
             } catch (WinException e1) {
                 try {
-                    showExceptionPanel("Win for " + itsPlayerOnesTurn(), e1.toString());
+                    DealWithVictoryException("Win for " + itsPlayerOnesTurn(), e1.toString());
                 } catch (IOException e2) {
-                    showExceptionPanel("Whoops", "Problems");
+                    try {
+                        DealWithVictoryException("Whoops", "Problems");
+                    } catch (IOException e3) {
+                        e3.printStackTrace();
+                    }
                 }
             }
         }
     }
 
-    private static void showExceptionPanel(String exceptionName, String optionPaneMessage) {
+    private void DealWithVictoryException(String exceptionName, String optionPaneMessage) throws IOException {
         JOptionPane.showMessageDialog(null,
                 "" + exceptionName,
                 "" + optionPaneMessage,
                 JOptionPane.ERROR_MESSAGE);
+        myGame.setToGameWonState();
+        String player = itsPlayerOnesTurn();
+
+        if(player.equals("Blue"))
+        {
+            playerOneWins++;
+            myGame.playerOneWins.setText("P1 "+playerOneWins);
+        }
+        else
+        {
+            playerTwoWins++;
+            myGame.playerTwoWins.setText("P2 "+playerTwoWins);
+        }
     }
 
     private void decideDiscPosition(int boardPosition) throws IOException, WinException {
