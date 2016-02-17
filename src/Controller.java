@@ -9,11 +9,14 @@ class Controller implements ActionListener {
 
     private final Gui myGame;
     public final Map<String, String> actionCommandList = new HashMap<>();
+    private final Map<String, Integer> directionDeviationList = new HashMap<>();
     private int turnCount = 1;
     private Image discImage = null;
-    private int playerOneWins =0;
-    private int playerTwoWins =0;
-
+    private int playerOneWins = 0;
+    private int playerTwoWins = 0;
+    private final String[] directions = {"DiagonalLeftTopToBottom",
+            "DiagonalRightTopToBottom", "DiagonalLeftBottomToTop", "DiagonalRightBottomToTop", "Left", "Right", "Down",};
+    private final int[] deviations = {7, 5, -7, -5, -1, 1, 6};
     private static final int[][] boardRepresentation = {
             {0, 1, 2, 3, 4, 5},
             {6, 7, 8, 9, 10, 11},
@@ -27,6 +30,7 @@ class Controller implements ActionListener {
     public Controller(Gui givenGuiView) {
         this.myGame = givenGuiView;
         setActionCommands();
+        initialiseDirectionDeviationMapping();
     }
 
     private static int whichRowIsItemIn(int item, String dimension) {
@@ -50,12 +54,18 @@ class Controller implements ActionListener {
         myGame.resetButton.addActionListener(this);
     }
 
+    private void initialiseDirectionDeviationMapping() {
+        for (int x = 0; x < directions.length; x++) {
+            directionDeviationList.put(directions[x], deviations[x]);
+        }
+    }
+
     public void actionPerformed(ActionEvent e) {
 
         if (e.getActionCommand().equals("RESET_GAME")) {
 
             myGame.resetBoard();
-            turnCount=1;
+            turnCount = 1;
 
             return;
         }
@@ -93,15 +103,12 @@ class Controller implements ActionListener {
         myGame.setToGameWonState();
         String player = itsPlayerOnesTurn();
 
-        if(player.equals("Blue"))
-        {
+        if (player.equals("Blue")) {
             playerOneWins++;
-            myGame.playerOneWins.setText("P1 "+playerOneWins);
-        }
-        else
-        {
+            myGame.playerOneWins.setText("P1 " + playerOneWins);
+        } else {
             playerTwoWins++;
-            myGame.playerTwoWins.setText("P2 "+playerTwoWins);
+            myGame.playerTwoWins.setText("P2 " + playerTwoWins);
         }
     }
 
@@ -141,23 +148,20 @@ class Controller implements ActionListener {
 
     private void checkWin(int boardPosition) throws WinException {
 
-        //we only need to check discs for left an right in that row if we check for right and left win
-        //we know the row so get the lowest value in it, start at that and check for each x both ways.
         int lowRange = boardRepresentation[whichRowIsItemIn(boardPosition, "Row")][0];
 
         for (int x = lowRange; x < lowRange + 6; x++) {
             if (whichRowIsItemIn(boardPosition, "Col") > 3) {
-                if (CheckWinHorizontal(x, "Horizontal")) throw new WinException();
+                if (CheckWinHorizontal(x, "Left")) throw new WinException();
             } else {
-                if (CheckWinHorizontal(x, "Horizontal")) throw new WinException();
+                if (CheckWinHorizontal(x, "Right")) throw new WinException();
             }
         }
-
         for (int x = 0; x < 42; x++) {
-            if (CheckWinHorizontal(x, "DiagonalLeftTopToBottom")) throw new WinException();
-            if (CheckWinHorizontal(x, "DiagonalRightTopToBottom")) throw new WinException();
-            if (CheckWinHorizontal(x, "DiagonalLeftBottomToTop")) throw new WinException();
-            if (CheckWinHorizontal(x, "DiagonalRightBottomToTop")) throw new WinException();
+
+            for (int y = 0; y < 4; y++) {
+                if (CheckWinHorizontal(x, directions[y])) throw new WinException();
+            }
         }
         if (CheckWinHorizontal(boardPosition, "Down")) throw new WinException();
     }
@@ -165,33 +169,12 @@ class Controller implements ActionListener {
     private Vector seeMyNeighbours(int boardPosition, String direction) {
         Vector<String> Neighbours = new Vector<>(4);
         int sum = 0;
-        int deviation = 0;
+        int deviation;
+        deviation = directionDeviationList.get(direction);
 
-        switch (direction) {
-            case "Horizontal":
-                deviation = (direction.equals("Left")) ? -1 : +1;
-                break;
-            case "DiagonalLeftTopToBottom":
-                deviation = 7;
-                break;
-            case "Down":
-                deviation = 6;
-                break;
-            case "DiagonalRightTopToBottom":
-                deviation = 5;
-                break;
-            case "DiagonalLeftBottomToTop":
-                deviation = -7;
-                break;
-            case "DiagonalRightBottomToTop":
-                deviation = -5;
-                break;
-            default:
-                break;
-        }
         for (int x = 0; x < 4; x++) {
             Neighbours.add(getButtonName(boardPosition - sum));
-            System.out.println(boardPosition - sum);
+
             sum -= deviation;
         }
 
