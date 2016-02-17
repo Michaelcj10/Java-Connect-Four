@@ -4,11 +4,12 @@ import java.awt.*;
 
 class Gui extends JFrame {
     JButton[] myBoard;
-    private JPanel gridPanel;
+    private JPanel gridPanel,bottomPanel;
     private Controller control;
     private final int boardGridSize = 42;
     private final int rowCount = 6;
     public final int absoluteMin = 0;
+    JButton resetButton = new JButton("Reset Game");
 
     private Gui() {
         super("Connect Four");
@@ -18,6 +19,7 @@ class Gui extends JFrame {
     private void initialisePanels() {
         myBoard = new JButton[boardGridSize];
         gridPanel = new JPanel();
+        bottomPanel = new JPanel();
         control = new Controller(this);
         makeGrid();
         gridPanel.setLayout(new GridLayout(rowCount+1, rowCount));
@@ -27,7 +29,7 @@ class Gui extends JFrame {
         setVisible(true);
     }
 
-    private void makeGrid() {
+    public void makeGrid() {
         for (int i = absoluteMin; i < boardGridSize; i++) {
 
 
@@ -69,12 +71,11 @@ class Gui extends JFrame {
         for (int i = absoluteMin; i < boardGridSize; i++) {
 
             myBoard[i].setIcon(null);
-            myBoard[i].setName(null);
+            String buttonText = (i % 2 == 0) ? "Text" : "AltText";
+            myBoard[i].setName(buttonText);
 
         }
     }
-
-
 
     private void setPanelOpacity() {
         gridPanel.setOpaque(false);
@@ -84,7 +85,10 @@ class Gui extends JFrame {
         contentPane.setBorder(new EmptyBorder(absoluteMin+5, absoluteMin+5, absoluteMin+5, absoluteMin+5));
         contentPane.setLayout(new BorderLayout(absoluteMin, absoluteMin));
         setContentPane(contentPane);
-        contentPane.add(gridPanel);
+        contentPane.add(gridPanel, BorderLayout.CENTER);
+        contentPane.add(bottomPanel, BorderLayout.SOUTH);
+        bottomPanel.add(resetButton);
+        resetButton.setActionCommand("RESET_GAME");
     }
 
     public static void main(String[] args) {

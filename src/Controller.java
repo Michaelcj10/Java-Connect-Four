@@ -26,15 +26,13 @@ class Controller implements ActionListener {
         setActionCommands();
     }
 
-    private static int whichRowIsItemIn(int item , String dimension)
-    {
+    private static int whichRowIsItemIn(int item, String dimension) {
         int returnValue;
 
-        for(int i=0; i<boardRepresentation.length; i++) {
-            for(int j=0; j<boardRepresentation[i].length; j++) {
-                if(  boardRepresentation[i][j] == item)
-                {
-                    returnValue = (dimension.equals("Col")) ? j:i;
+        for (int i = 0; i < boardRepresentation.length; i++) {
+            for (int j = 0; j < boardRepresentation[i].length; j++) {
+                if (boardRepresentation[i][j] == item) {
+                    returnValue = (dimension.equals("Col")) ? j : i;
                     return returnValue;
                 }
             }
@@ -46,22 +44,32 @@ class Controller implements ActionListener {
         for (int x = myGame.absoluteMin; x < 6; x++) {
             actionCommandList.put(Integer.toString(x), "" + x);
         }
+        myGame.resetButton.addActionListener(this);
+
     }
 
     public void actionPerformed(ActionEvent e) {
 
-        if (e.getSource() instanceof JButton) {
+        if (e.getActionCommand().equals("RESET_GAME")) {
+
+            myGame.resetBoard();
+            turnCount=1;
+            
+            return;
+        }
+
+       if (e.getSource() instanceof JButton) {
 
             turnCount++;
             try {
                 decideDiscPosition(Integer.parseInt(e.getActionCommand()));
             } catch (IOException e1) {
-                e1.printStackTrace();
+                showExceptionPanel("Whoops", "Problems");
             } catch (WinException e1) {
                 try {
-                    showExceptionPanel("Win for " +itsPlayerOnesTurn(), e1.toString());
+                    showExceptionPanel("Win for " + itsPlayerOnesTurn(), e1.toString());
                 } catch (IOException e2) {
-                    e2.printStackTrace();
+                    showExceptionPanel("Whoops", "Problems");
                 }
             }
         }
@@ -110,62 +118,74 @@ class Controller implements ActionListener {
 
     private void checkWin(int boardPosition) throws WinException {
 
-        //get the row the disc is in
-        int row = whichRowIsItemIn(boardPosition, "Row");
         //we only need to check discs for left an right in that row if we check for right and left win
         //we know the row so get the lowest value in it, start at that and check for each x both ways.
-        int lowRange= boardRepresentation[whichRowIsItemIn(boardPosition, "Row")][0];
+        int lowRange = boardRepresentation[whichRowIsItemIn(boardPosition, "Row")][0];
 
-        for(int x=lowRange; x<lowRange+6; x++)
-        {
-            if(whichRowIsItemIn(boardPosition, "Col")>3)
-            {
-                if (checkWinDirectionLeft(x, "Left")) throw new WinException();
-            }
-            else
-            {
-                if (checkWinDirectionLeft(x,"Right")) throw new WinException();
+        for (int x = lowRange; x < lowRange + 6; x++) {
+            if (whichRowIsItemIn(boardPosition, "Col") > 3) {
+                if (CheckWinHorizontal(x, "Horizontal")) throw new WinException();
+            } else {
+                if (CheckWinHorizontal(x, "Horizontal")) throw new WinException();
             }
         }
+
+        for (int x = 0; x < 42; x++) {
+            if (CheckWinHorizontal(x, "DiagonalLeftTopToBottom")) throw new WinException();
+            if (CheckWinHorizontal(x, "DiagonalRightTopToBottom")) throw new WinException();
+            if (CheckWinHorizontal(x, "DiagonalLeftBottomToTop")) throw new WinException();
+            if (CheckWinHorizontal(x, "DiagonalRightBottomToTop")) throw new WinException();
+        }
+        if (CheckWinHorizontal(boardPosition, "Down")) throw new WinException();
     }
 
-    private Vector seeMyNeighbours(int boardPosition, String direction)
-    {
+    private Vector seeMyNeighbours(int boardPosition, String direction) {
         Vector<String> Neighbours = new Vector<>(4);
+        int sum = 0;
+        int deviation = 0;
 
-        if(direction.equals("Left"))
-        {
-            for(int x = 0; x<4; x++)
-            {
-                Neighbours.add(getButtonName(boardPosition-x));
-            }
+        switch (direction) {
+            case "Horizontal":
+                deviation = (direction.equals("Left")) ? -1 : +1;
+                break;
+            case "DiagonalLeftTopToBottom":
+                deviation = 7;
+                break;
+            case "Down":
+                deviation = 6;
+                break;
+            case "DiagonalRightTopToBottom":
+                deviation = 5;
+                break;
+            case "DiagonalLeftBottomToTop":
+                deviation = -7;
+                break;
+            case "DiagonalRightBottomToTop":
+                deviation = -5;
+                break;
+            default:
+                break;
         }
-
-        if(direction.equals("Right"))
-        {
-            for(int x = 0; x<4; x++)
-            {
-                Neighbours.add(getButtonName(boardPosition+x));
-            }
+        for (int x = 0; x < 4; x++) {
+            Neighbours.add(getButtonName(boardPosition - sum));
+            System.out.println(boardPosition - sum);
+            sum -= deviation;
         }
 
         return Neighbours;
     }
 
-    private boolean checkWinDirectionLeft(int boardPosition, String direction) {
+    private boolean CheckWinHorizontal(int boardPosition, String direction) {
 
-        Vector<String> Neighbours = seeMyNeighbours(boardPosition, direction);
+        Vector Neighbours = seeMyNeighbours(boardPosition, direction);
 
-        try
-        {
+        try {
             if (Neighbours.elementAt(0).equals(Neighbours.elementAt(3))
                     && Neighbours.elementAt(0).equals(Neighbours.elementAt(2))
-                    && Neighbours.elementAt(0).equals(Neighbours.elementAt(1))){
+                    && Neighbours.elementAt(0).equals(Neighbours.elementAt(1))) {
                 return true;
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
 
@@ -173,15 +193,11 @@ class Controller implements ActionListener {
     }
 
     private String getButtonName(int boardPosition) {
-        try
-        {
+        try {
             return myGame.myBoard[boardPosition].getName();
-        }
-        catch (Exception ignored)
-        {
-
+        } catch (Exception ignored) {
         }
 
-      return null;
+        return null;
     }
 }
