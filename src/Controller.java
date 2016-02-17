@@ -152,18 +152,18 @@ class Controller implements ActionListener {
 
         for (int x = lowRange; x < lowRange + 6; x++) {
             if (whichRowIsItemIn(boardPosition, "Col") > 3) {
-                if (CheckWinHorizontal(x, "Left")) throw new WinException();
+                if (CheckPositionAgainstNeighbours(x, "Left")) throw new WinException();
             } else {
-                if (CheckWinHorizontal(x, "Right")) throw new WinException();
+                if (CheckPositionAgainstNeighbours(x, "Right")) throw new WinException();
             }
         }
         for (int x = 0; x < 42; x++) {
 
             for (int y = 0; y < 4; y++) {
-                if (CheckWinHorizontal(x, directions[y])) throw new WinException();
+                if (CheckPositionAgainstNeighbours(x, directions[y])) throw new WinException();
             }
         }
-        if (CheckWinHorizontal(boardPosition, "Down")) throw new WinException();
+        if (CheckPositionAgainstNeighbours(boardPosition, "Down")) throw new WinException();
     }
 
     private Vector seeMyNeighbours(int boardPosition, String direction) {
@@ -181,7 +181,7 @@ class Controller implements ActionListener {
         return Neighbours;
     }
 
-    private boolean CheckWinHorizontal(int boardPosition, String direction) {
+    private boolean CheckPositionAgainstNeighbours(int boardPosition, String direction) {
 
         Vector Neighbours = seeMyNeighbours(boardPosition, direction);
 
